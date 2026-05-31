@@ -20,7 +20,7 @@
     return (
       target.dataset?.testid === 'chat-input'
       || target.closest('[data-testid="chat-input"]')
-      || (target.getAttribute && target.getAttribute('contenteditable') === 'true')
+      || target.tagName === 'TEXTAREA'
     );
   }
 
@@ -52,17 +52,26 @@
         e.preventDefault();
         e.stopPropagation();
 
-        const shiftEnter = new KeyboardEvent('keydown', {
-          key: 'Enter',
-          code: 'Enter',
-          shiftKey: true,
-          bubbles: true,
-          cancelable: true,
-        });
-        target.dispatchEvent(shiftEnter);
+        if (target.tagName === 'TEXTAREA') {
+          const start = target.selectionStart;
+          const end = target.selectionEnd;
+          const value = target.value;
+          target.value = value.substring(0, start) + '\n' + value.substring(end);
+          target.selectionStart = target.selectionEnd = start + 1;
+          target.dispatchEvent(new Event('input', { bubbles: true }));
+        } else {
+          const shiftEnter = new KeyboardEvent('keydown', {
+            key: 'Enter',
+            code: 'Enter',
+            shiftKey: true,
+            bubbles: true,
+            cancelable: true,
+          });
+          target.dispatchEvent(shiftEnter);
 
-        if (!shiftEnter.defaultPrevented) {
-          document.execCommand('insertParagraph');
+          if (!shiftEnter.defaultPrevented) {
+            document.execCommand('insertParagraph');
+          }
         }
         return;
       }
