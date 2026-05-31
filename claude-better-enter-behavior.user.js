@@ -20,6 +20,7 @@
     return (
       target.dataset?.testid === 'chat-input'
       || target.closest('[data-testid="chat-input"]')
+      || (target.getAttribute && target.getAttribute('contenteditable') === 'true')
     );
   }
 
